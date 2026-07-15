@@ -1,0 +1,54 @@
+# Redis HA (Sentinel) — opt-in overlay
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.redis-ha.yml up -d
+# App env:
+#   REDIS_SENTINELS=localhost:26379
+#   REDIS_MASTER_NAME=mymaster
+# (unset REDIS_URL or ignore it when SENTINELS is set)
+
+services:
+  redis:
+    profiles: ["legacy-single-redis"]
+
+  redis-master:
+    image: redis:7-alpine
+    container_name: iesdata-redis-master
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis-replica:
+    image: redis:7-alpine
+    container_name: iesdata-redis-replica
+    restart: unless-stopped
+    command: ["redis-server", "--replicaof", "redis-master", "6379"]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: iesdata-redis-sentinel
+    restart: unless-stopped
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    ports:
+      - "26379:26379"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        cat > /tmp/sentinel.conf <<'EOF'
+        port 26379
+        sentinel monitor mymaster redis-master 6379 1
+        sentinel down-after-milliseconds mymaster 5000
+        sentinel failover-timeout mymaster 10000
+        sentinel parallel-syncs mymaster 1
+        EOF
+        redis-sentinel /tmp/sentinel.conf
