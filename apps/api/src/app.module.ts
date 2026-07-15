@@ -20,11 +20,32 @@ import { ApiUsageDaily } from './usage/entities/api-usage-daily.entity';
 import { UsageModule } from './usage/usage.module';
 import { User } from './users/entities/user.entity';
 
+const PLACEHOLDER_JWT_SECRETS = new Set([
+  'change-me-access-min-32-chars-long!!',
+  'change-me-refresh-min-32-chars-long!',
+]);
+
+function validateEnv(env: Record<string, unknown>) {
+  for (const key of ['JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET']) {
+    const value = env[key];
+    if (typeof value !== 'string' || value.length < 32) {
+      throw new Error(`${key} deve ter pelo menos 32 caracteres.`);
+    }
+    if (PLACEHOLDER_JWT_SECRETS.has(value)) {
+      throw new Error(
+        `${key} está com o valor placeholder do .env.example. Gere um segredo forte (ex.: openssl rand -hex 32) antes de subir a API.`,
+      );
+    }
+  }
+  return env;
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
+      validate: validateEnv,
     }),
     ThrottlerModule.forRoot({
       throttlers: [
