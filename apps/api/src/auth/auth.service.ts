@@ -73,6 +73,9 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado');
     }
+    if (payload.ver !== user.tokenVersion) {
+      throw new UnauthorizedException('Refresh token revogado');
+    }
     return this.issueTokens(user);
   }
 
@@ -106,6 +109,7 @@ export class AuthService {
       throw new BadRequestException('A nova senha deve ser diferente da atual');
     }
     user.passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    user.tokenVersion += 1;
     await this.usersRepo.save(user);
     return this.issueTokens(user);
   }
@@ -128,10 +132,12 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       typ: 'access',
+      ver: user.tokenVersion,
     };
     const refreshPayload: RefreshTokenPayload = {
       sub: user.id,
       typ: 'refresh',
+      ver: user.tokenVersion,
     };
 
     const accessTtl = this.config.get<string>('JWT_ACCESS_TTL', '1h');

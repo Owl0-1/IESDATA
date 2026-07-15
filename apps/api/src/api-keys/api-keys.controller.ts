@@ -28,7 +28,8 @@ export class ApiKeysController {
   @Post()
   @ApiOperation({
     summary: 'Criar API key',
-    description: 'Retorna a key completa; ela também fica disponível na listagem.',
+    description:
+      'Retorna a key completa apenas nesta resposta — guarde-a agora, ela não é recuperável depois.',
   })
   create(@CurrentUser() user: User, @Body() dto: CreateApiKeyDto) {
     return this.apiKeysService.create(user, dto.name);

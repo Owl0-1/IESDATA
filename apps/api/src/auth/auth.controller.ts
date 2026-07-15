@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
@@ -17,6 +18,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('auth/register')
   @ApiOperation({ summary: 'Registrar desenvolvedor' })
   register(@Body() dto: RegisterDto) {
@@ -24,6 +26,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('auth/login')
   @ApiOperation({ summary: 'Login' })
   login(@Body() dto: LoginDto) {

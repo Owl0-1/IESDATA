@@ -29,6 +29,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado');
     }
+    if (payload.ver !== user.tokenVersion) {
+      throw new UnauthorizedException('Token revogado');
+    }
     return user;
   }
 }
