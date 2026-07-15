@@ -8,13 +8,12 @@ Fonte dos dados: [Microdados do Censo da Educação Superior (INEP)](https://www
 
 | Peça | Tecnologia | Ambiente |
 |---|---|---|
-| API | NestJS 11, TypeORM, Swagger | Dev local → AWS |
-| DB / cache | PostgreSQL 16, Redis 7 (+ Sentinel HA opcional) | Docker local → AWS |
-| Front | Next.js 15 (App Router), React 19, Zustand, React Query, Tailwind v4 | Dev local → Vercel |
+| API | NestJS 11, TypeORM, Swagger | Dev local → |
+| DB / cache | PostgreSQL 16, Redis 7 (+ Sentinel HA opcional) | Docker local |
+| Front | Next.js 15 (App Router), React 19, Zustand, React Query, Tailwind v4 | Dev local |
 
 Documentação completa da arquitetura: [ARCHITECTURE.md](ARCHITECTURE.md) (arquivo local, fora do git — ver seção abaixo).
 
-Spec de desenho original: [docs/design.md](docs/design.md) · roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Estado atual
 
@@ -28,7 +27,7 @@ Já implementado:
 - **Seed**: scripts para importar os microdados reais do INEP (`seed:censup`), enriquecer CNPJ via e-MEC (`seed:enrich-cnpj`) e popular dados fake para dev local (`seed:demo`).
 - **Web** (`apps/web`, Next.js): landing, login/register, dashboard (API keys, analytics de uso, conta), playground interativo e explorador de docs a partir do OpenAPI da API.
 
-Pendências conhecidas: migrations formais do TypeORM (hoje roda com `synchronize`), cobertura de testes automatizados ainda baixa, sem pipeline de CI/CD. Detalhes em [ARCHITECTURE.md](ARCHITECTURE.md) e [docs/roadmap.md](docs/roadmap.md).
+Pendências conhecidas: migrations formais do TypeORM (hoje roda com `synchronize`), cobertura de testes automatizados ainda baixa, sem pipeline de CI/CD. Detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Dev rápido
 
@@ -53,13 +52,3 @@ Para testar Redis em modo HA (Sentinel) localmente:
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.redis-ha.yml up -d
 ```
-
-## Produção (resumo)
-
-- Front: Vercel (`apps/web`)
-- API + Postgres + Redis: AWS (EC2; DB sem porta pública)
-- Consultar DB no Mac: túnel SSH → TablePlus em `127.0.0.1:5432`
-
-## Custo / AWS
-
-Ative **Free Tier alerts** e um budget **Zero spend** em Billing → Budgets para não passar do plano gratuito sem aviso.
