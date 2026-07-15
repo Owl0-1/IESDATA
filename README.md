@@ -12,7 +12,7 @@ Fonte dos dados: [Microdados do Censo da Educação Superior (INEP)](https://www
 | DB / cache | PostgreSQL 16, Redis 7 (+ Sentinel HA opcional) | Docker local |
 | Front | Next.js 15 (App Router), React 19, Zustand, React Query, Tailwind v4 | Dev local |
 
-Documentação completa da arquitetura: [ARCHITECTURE.md](ARCHITECTURE.md) (arquivo local, fora do git — ver seção abaixo).
+Documentação completa da arquitetura: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 
 ## Estado atual
